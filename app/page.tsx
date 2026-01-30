@@ -1,65 +1,79 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useState } from "react";
+// 1. useRouter ko import karein
+import { useRouter } from "next/navigation"; 
+
+export default function HomePage() {
+  const router = useRouter(); // 2. Router instance initialize karein
+  const [checkedIn, setCheckedIn] = useState(false);
+  const [checkInTime, setCheckInTime] = useState<string | null>(null);
+  const [checkOutTime, setCheckOutTime] = useState<string | null>(null);
+
+  const handleCheckIn = () => {
+    const time = new Date().toLocaleTimeString();
+    setCheckedIn(true);
+    setCheckInTime(time);
+  };
+
+  const handleCheckOut = () => {
+    const time = new Date().toLocaleTimeString();
+    setCheckedIn(false);
+    setCheckOutTime(time);
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main className="min-h-screen bg-gray-100 flex items-center justify-center">
+      <div className="bg-white shadow-lg rounded-xl p-8 w-full max-w-md">
+        <h1 className="text-2xl font-bold text-center mb-2">
+          Attendance Tracker
+        </h1>
+        <p className="text-center text-gray-500 mb-6">
+          Check in when you arrive, check out when you leave
+        </p>
+
+        {/* Status Section */}
+        <div className="bg-gray-50 border rounded-lg p-4 mb-6 text-center">
+          {!checkedIn && !checkInTime && (
+            <p className="font-semibold text-gray-700">Not checked in yet</p>
+          )}
+          {checkedIn && (
+            <p className="font-semibold text-green-600">Checked in at {checkInTime}</p>
+          )}
+          {checkOutTime && !checkedIn && (
+            <p className="font-semibold text-red-600">Checked out at {checkOutTime}</p>
+          )}
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+
+        {/* Main Action Buttons */}
+        <div className="flex gap-4 mb-6">
+          <button
+            onClick={handleCheckIn}
+            disabled={checkedIn}
+            className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-300 text-white py-3 rounded-lg font-semibold transition"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            Check In
+          </button>
+
+          <button
+            onClick={handleCheckOut}
+            disabled={!checkedIn}
+            className="flex-1 bg-red-600 hover:bg-red-700 disabled:bg-gray-300 text-white py-3 rounded-lg font-semibold transition"
           >
-            Documentation
-          </a>
+            Check Out
+          </button>
         </div>
-      </main>
-    </div>
+
+        <hr className="my-6 border-gray-200" />
+
+        {/* 3. Redirect Button */}
+        <button
+          onClick={() => router.push("/history")} // Yahan apna path likhein
+          className="w-full bg-blue-100 text-blue-700 hover:bg-blue-200 py-2 rounded-lg font-medium transition flex items-center justify-center gap-2"
+        >
+          View Attendance History →
+        </button>
+      </div>
+    </main>
   );
 }
