@@ -30,6 +30,25 @@ export default function HistoryPage() {
     localStorage.setItem("attendanceRecords", JSON.stringify(updated));
   };
 
+  const calculateHours = (checkIn: string, checkOut: string | null) => {
+  if (!checkOut) return "-"; // agar checkOut null hai
+
+  // Convert times to Date objects (today's date is enough)
+  const [inH, inM, inS] = checkIn.split(":").map(Number);
+  const [outH, outM, outS] = checkOut.split(":").map(Number);
+
+  const date = new Date();
+  const start = new Date(date.getFullYear(), date.getMonth(), date.getDate(), inH, inM, inS || 0);
+  const end = new Date(date.getFullYear(), date.getMonth(), date.getDate(), outH, outM, outS || 0);
+
+  const diff = (end.getTime() - start.getTime()) / (1000 * 60 * 60); // in hours (decimal)
+  const hours = Math.floor(diff);
+  const minutes = Math.round((diff - hours) * 60);
+
+  return `${hours}h ${minutes}m`;
+};
+
+
   const handleEdit = (index: number) => {
     const record = records[index];
     const newCheckIn = prompt("Edit Check-In Time:", record.checkIn);
@@ -68,6 +87,7 @@ export default function HistoryPage() {
                 <th className="border p-2">Date</th>
                 <th className="border p-2">Check In</th>
                 <th className="border p-2">Check Out</th>
+                <th className="border p-2">Total Hours</th>
                 <th className="border p-2">Actions</th>
               </tr>
             </thead>
@@ -77,6 +97,9 @@ export default function HistoryPage() {
                   <td className="border p-2">{r.date}</td>
                   <td className="border p-2 text-green-600">{r.checkIn}</td>
                   <td className="border p-2 text-red-600">{r.checkOut ?? "-"}</td>
+                  <td className="border p-2 text-blue-600">
+                    {calculateHours(r.checkIn, r.checkOut)}
+                  </td>
                   <td className="border p-2 flex justify-center gap-2">
                     <button
                       className="bg-yellow-400 hover:bg-yellow-500 text-white py-1 px-2 rounded"
