@@ -3,24 +3,78 @@
 import { useState } from "react";
 // 1. useRouter ko import karein
 import { useRouter } from "next/navigation"; 
+import { useEffect } from "react";
+
+
 
 export default function HomePage() {
   const router = useRouter(); // 2. Router instance initialize karein
   const [checkedIn, setCheckedIn] = useState(false);
   const [checkInTime, setCheckInTime] = useState<string | null>(null);
   const [checkOutTime, setCheckOutTime] = useState<string | null>(null);
+const getTodayDate = () => {
+  return new Date().toISOString().split("T")[0];
+};
 
-  const handleCheckIn = () => {
-    const time = new Date().toLocaleTimeString();
-    setCheckedIn(true);
-    setCheckInTime(time);
-  };
+const getRecords = () => {
+  return JSON.parse(localStorage.getItem("attendanceRecords") || "[]");
+};
 
-  const handleCheckOut = () => {
-    const time = new Date().toLocaleTimeString();
-    setCheckedIn(false);
-    setCheckOutTime(time);
-  };
+const saveRecords = (records: any[]) => {
+  localStorage.setItem("attendanceRecords", JSON.stringify(records));
+};
+
+useEffect(() => {
+  const today = getTodayDate();
+  const records = getRecords();
+  const todayRecord = records.find((r: any) => r.date === today);
+
+  if (todayRecord) {
+    setCheckInTime(todayRecord.checkIn);
+    setCheckOutTime(todayRecord.checkOut);
+    setCheckedIn(!!todayRecord.checkIn && !todayRecord.checkOut);
+  }
+}, []);
+
+const handleCheckIn = () => {
+  const time = new Date().toLocaleTimeString();
+  const today = getTodayDate();
+
+  const records = getRecords();
+
+  // agar aaj ka record already nahi hai
+  if (!records.find((r: any) => r.date === today)) {
+    records.push({
+      date: today,
+      checkIn: time,
+      checkOut: null,
+    });
+  }
+
+  saveRecords(records);
+  setCheckedIn(true);
+  setCheckInTime(time);
+};
+
+
+
+const handleCheckOut = () => {
+  const time = new Date().toLocaleTimeString();
+  const today = getTodayDate();
+
+  const records = getRecords();
+  const todayRecord = records.find((r: any) => r.date === today);
+
+  if (todayRecord) {
+    todayRecord.checkOut = time;
+  }
+
+  saveRecords(records);
+  setCheckedIn(false);
+  setCheckOutTime(time);
+};
+
+
 
   return (
     <main className="min-h-screen bg-gray-100 flex items-center justify-center">
